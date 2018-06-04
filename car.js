@@ -49,7 +49,7 @@ const lowerHull = Bodies.rectangle(wx, wy - 30, wSpace * wCount, 20, {
   }
 });
 
-const jumpSensor = Bodies.rectangle(wx, wy - 30, wCount * wSpace, 70, {
+const jumpSensor = Bodies.rectangle(wx, wy, wCount * wSpace, 70, {
   isSensor: true,
   density: 0.000001,
   label: 'jumpSensor',
@@ -60,7 +60,7 @@ const jumpSensor = Bodies.rectangle(wx, wy - 30, wCount * wSpace, 70, {
 
 
 World.add(engine.world, [
-  lowerHull, jumpSensor,
+  jumpSensor, lowerHull,
 
   // connect lowerHull to wheels
   Constraint.create({
@@ -73,22 +73,22 @@ World.add(engine.world, [
     bodyB: lowerHull,
     // render: {visible: false}
   }),
-  
+
   // connect jumpSensor to lowerHull
   Constraint.create({
     bodyA: lowerHull,
     bodyB: jumpSensor,
     pointA: {x: 90, y: 0},
-    pointB: {x: 90, y: 0},
-    length: 0.001
+    pointB: {x: 90, y: -20},
+    length: 0.001,
     // render: {visible: false}
   }),
   Constraint.create({
     bodyA: lowerHull,
     bodyB: jumpSensor,
     pointA: {x: -90, y: 0},
-    pointB: {x: -90, y: 0},
-    length: 0.001
+    pointB: {x: -90, y: -20},
+    length: 0.001,
     // render: {visible: false}
   })
 ]);
