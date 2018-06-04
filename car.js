@@ -132,6 +132,7 @@ Events.on(engine, 'collisionStart', event => {
     if (pairs[i].bodyA == jumpSensor && pairs[i].bodyB == floor ||
       pairs[i].bodyB == jumpSensor && pairs[i].bodyA == floor) {
       allowJump = true;
+      console.log()
     }
   }
 });
@@ -139,8 +140,8 @@ Events.on(engine, 'collisionStart', event => {
 Events.on(engine, 'collisionEnd', event => {
   let pairs = event.source.pairs.collisionActive;
   for (let i = 0; i < pairs.length; i++) {
-    if (pairs[i].bodyA == jumpSensor /*&& pairs[i].bodyB == floor*/ ||
-      pairs[i].bodyB == jumpSensor /*&& pairs[i].bodyA == floor*/) {
+    if (pairs[i].bodyA == jumpSensor && pairs[i].bodyB == floor ||
+      pairs[i].bodyB == jumpSensor && pairs[i].bodyA == floor) {
       allowJump = true;
       break;
     } else {
@@ -151,13 +152,13 @@ Events.on(engine, 'collisionEnd', event => {
 
 var angVel = 0.1;
 var horVel = 0.22;
-var verVel = 0.025;
+var verVel = 0.4;
 
 document.addEventListener('keydown', function (e) {
   if (allowJump && e.keyCode == KEY_SPACE)
     Body.applyForce(lowerHull, lowerHull.position, {
       x: 0,
-      y: (-0.025 * wCount)
+      y: (-verVel * wCount)
     });
   if (e.keyCode == KEY_A) {
     Body.applyForce(lowerHull, lowerHull.position, {
