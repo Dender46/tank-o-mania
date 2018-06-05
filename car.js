@@ -58,62 +58,35 @@ const jumpSensor = Bodies.rectangle(wx, wy, wCount * wSpace, 70, {
   }
 });
 
-
 World.add(engine.world, [
   jumpSensor, lowerHull,
 
   // connect lowerHull to wheels
-  Constraint.create({
-    bodyA: wheels[0],
-    bodyB: lowerHull,
-    // render: {visible: false}
-  }),
-  Constraint.create({
-    bodyA: wheels[4],
-    bodyB: lowerHull,
-    // render: {visible: false}
-  }),
+  Constraint.create({ bodyA: wheels[0], bodyB: lowerHull, render: {visible: false} }),
+  Constraint.create({ bodyA: wheels[4], bodyB: lowerHull, render: {visible: false} }),
 
   // connect jumpSensor to lowerHull
-  Constraint.create({
-    bodyA: lowerHull,
-    bodyB: jumpSensor,
+  Constraint.create({ bodyA: lowerHull, bodyB: jumpSensor,
+    length: 0.001, render: {visible: false},
     pointA: {x: 90, y: 0},
-    pointB: {x: 90, y: -20},
-    length: 0.001,
-    // render: {visible: false}
+    pointB: {x: 90, y: -20}
   }),
-  Constraint.create({
-    bodyA: lowerHull,
-    bodyB: jumpSensor,
+  Constraint.create({ bodyA: lowerHull, bodyB: jumpSensor,
+    length: 0.001, render: {visible: false},
     pointA: {x: -90, y: 0},
     pointB: {x: -90, y: -20},
-    length: 0.001,
-    // render: {visible: false}
   })
 ]);
 
 // Connecting wheels all together
 for (let i = 0; i < wCount - 1; i++) {
   World.add(engine.world, [
-    Constraint.create({
-      bodyA: wheels[i],
-      bodyB: wheels[i + 1],
-      render: {
-        strokeStyle: '#a02b2b'
-      }
-    })
+    Constraint.create({ bodyA: wheels[i], bodyB: wheels[i+1], render: {strokeStyle: '#a02b2b'}})
   ]);
 }
 for (let i = 0; i < wCount / 2; i++) {
   World.add(engine.world, [
-    Constraint.create({
-      bodyA: wheels[i],
-      bodyB: wheels[wCount - i - 1],
-      render: {
-        visible: false
-      }
-    })
+    Constraint.create({ bodyA: wheels[i], bodyB: wheels[wCount-i-1], render: {visible: false}})
   ]);
 }
 
