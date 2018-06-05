@@ -129,23 +129,16 @@ var verVel = 0.4;
 
 document.addEventListener('keydown', function (e) {
   if (allowJump && e.keyCode == KEY_SPACE)
-    Body.applyForce(lowerHull, lowerHull.position, {
-      x: 0,
-      y: (-verVel * wCount)
-    });
+    Body.applyForce(lowerHull, lowerHull.position, { x: 0, y: (-verVel * wCount) });
+
   if (e.keyCode == KEY_A) {
-    Body.applyForce(lowerHull, lowerHull.position, {
-      x: -horVel,
-      y: 0
-    });
+    Body.applyForce(lowerHull, lowerHull.position, { x: -horVel, y: 0 });
     for (let i = 0; i < 5; i++)
       Body.setAngularVelocity(wheels[i], -angVel)
   }
+  
   if (e.keyCode == KEY_D) {
-    Body.applyForce(lowerHull, lowerHull.position, {
-      x: horVel,
-      y: 0
-    });
+    Body.applyForce(lowerHull, lowerHull.position, { x: horVel, y: 0 });
     for (let i = 0; i < wheels.length; i++)
       Body.setAngularVelocity(wheels[i], angVel)
   }
