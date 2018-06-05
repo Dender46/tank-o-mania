@@ -92,7 +92,7 @@ for (let i = 0; i < wCount / 2; i++) {
 
 // ----- TERRAIN -----
 World.add(engine.world, [
-  Bodies.trapezoid(170, height-170, 240, 80, 0.5, {isStatic: true}),
+  Bodies.trapezoid(170, height-170, 240, 80, 0.5, {isStatic: true, label: 'Terrain'}),
 
 ]);
 
@@ -102,8 +102,8 @@ var allowJump = false;
 Events.on(engine, 'collisionStart', event => {
   let pairs = event.pairs;
   for (let i = 0; i < pairs.length; i++) {
-    if (pairs[i].bodyA == jumpSensor && pairs[i].bodyB == floor ||
-      pairs[i].bodyB == jumpSensor && pairs[i].bodyA == floor) {
+    if (pairs[i].bodyA == jumpSensor && pairs[i].bodyB.label == 'Terrain' ||
+      pairs[i].bodyB == jumpSensor && pairs[i].bodyA.label == 'Terrain') {
       allowJump = true;
       console.log()
     }
@@ -113,8 +113,8 @@ Events.on(engine, 'collisionStart', event => {
 Events.on(engine, 'collisionEnd', event => {
   let pairs = event.source.pairs.collisionActive;
   for (let i = 0; i < pairs.length; i++) {
-    if (pairs[i].bodyA == jumpSensor && pairs[i].bodyB == floor ||
-      pairs[i].bodyB == jumpSensor && pairs[i].bodyA == floor) {
+    if (pairs[i].bodyA == jumpSensor && pairs[i].bodyB.label == 'Terrain' ||
+      pairs[i].bodyB == jumpSensor && pairs[i].bodyA.label == 'Terrain') {
       allowJump = true;
       break;
     } else {

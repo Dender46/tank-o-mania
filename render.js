@@ -28,7 +28,7 @@ var floor = Bodies.rectangle(width/2, height/1.2, width, 50, {
   isStatic: true,
   density: 1,
   friction: 0.2,
-  label: 'floor'
+  label: 'Terrain'
 });
 
 // Drag and drop
