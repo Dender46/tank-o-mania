@@ -54,7 +54,7 @@ const jumpSensor = Bodies.rectangle(wx, wy, wCount * wSpace, 70, {
   density: 0.000001,
   label: 'jumpSensor',
   render: {
-    opacity: 0.1
+    visible: false
   }
 });
 
