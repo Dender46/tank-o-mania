@@ -12,6 +12,8 @@ const KEY_SPACE = 32;
 const KEY_A = 65;
 const KEY_D = 68;
 
+const RED = '#c02942';
+
 // ----- WHEELS -----
 const wSize = 16;
 const wCount = 5;
@@ -24,10 +26,9 @@ const wheelOptions = {
   restitution: 0.2,
   density: 0.01,
   render: {
-    fillStyle: '#111',
+    fillStyle: '#161616',
     strokeStyle: '#333',
-    lineWidth: 6,
-    opacity: 0.6
+    lineWidth: 6
   }
 }
 
@@ -38,8 +39,19 @@ for (let i = -wCenter; i < wCount - wCenter; i++) {
   wheels.push(wheel)
   World.add(engine.world, [wheel]);
 }
+// Connecting wheels all together
+for (let i = 0; i < wCount - 1; i++) {
+  World.add(engine.world, [
+    Constraint.create({ bodyA: wheels[i], bodyB: wheels[i+1], render: {strokeStyle: RED, lineWidth: 3}})
+  ]);
+}
+for (let i = 0; i < wCount / 2; i++) {
+  World.add(engine.world, [
+    Constraint.create({ bodyA: wheels[i], bodyB: wheels[wCount-i-1], render: {visible: false}})
+  ]);
+}
 
-// ----- HULL WITH JUMP SENSOR -----
+// ----- HULL -----
 var hullRenderOptions = {
   fillStyle: '#111',
   strokeStyle: '#333',
@@ -47,13 +59,15 @@ var hullRenderOptions = {
 }
 
 const lowerHull = Bodies.trapezoid(wx, wy - 30, wSpace * wCount, 20, 0.1, {
-  density: 0.01, render: hullRenderOptions
+  density: 0.01, chamfer: {radius: 1}, render: hullRenderOptions
+});
+var group = Body.nextGroup(true);
+const upperHull = Bodies.trapezoid(wx, wy - 60, 115, 40, 0.1, {
+  density: 0.000000000001, chamfer: {radius: [1, 10, 10, 1]}, render: hullRenderOptions,
+  collisionFilter: {group: group}
 });
 
-const upperHull = Bodies.trapezoid(wx, wy - 55, 105, 30, 0.1, {
-  density: 0.000000000001, render: hullRenderOptions
-});
-
+// ----- JUMPSENSOR -----
 const jumpSensor = Bodies.rectangle(wx, wy, wCount * wSpace, 70, {
   isSensor: true,
   density: 0.000001,
@@ -61,8 +75,13 @@ const jumpSensor = Bodies.rectangle(wx, wy, wCount * wSpace, 70, {
   render: { visible: false }
 });
 
+// ----- BARREL -----
+const barrel = Bodies.rectangle(wx, wy - 100, 12, 120, {
+  density: 0.000000000001, collisionFilter: {group: group}, render: hullRenderOptions
+})
+
 World.add(engine.world, [
-  jumpSensor, lowerHull, upperHull,
+  jumpSensor, barrel, lowerHull, upperHull,
 
   // 1. connect lowerHull to wheels
   Constraint.create({ bodyA: wheels[0], bodyB: lowerHull, render: {visible: false} }),
@@ -84,23 +103,20 @@ World.add(engine.world, [
   }),
   
   // 4. connect upperHull to lowerHull
-  Constraint.create({ bodyA: lowerHull, bodyB: upperHull, render: {visible: false},
-    pointA: { x: -40, y: 0},
-    pointB: { x: -40, y: 0},
+  Constraint.create({ bodyA: lowerHull, bodyB: upperHull,
+    render: {strokeStyle: RED, anchors: false, lineWidth: 3},
+    pointA: {x: -40, y: 0},
+    pointB: {x: -40, y: 0},
+  }),
+
+  // 5. connect barrel to upperHull
+  Constraint.create({ bodyA: barrel, bodyB: upperHull,
+    render: {strokeStyle: '#181818', lineWidth: 5},
+    pointA: {x: 0, y: 50},
+    pointB: {x: 0, y: 10},
   })
 ]);
 
-// Connecting wheels all together
-for (let i = 0; i < wCount - 1; i++) {
-  World.add(engine.world, [
-    Constraint.create({ bodyA: wheels[i], bodyB: wheels[i+1], render: {strokeStyle: '#c02942', lineWidth: 3}})
-  ]);
-}
-for (let i = 0; i < wCount / 2; i++) {
-  World.add(engine.world, [
-    Constraint.create({ bodyA: wheels[i], bodyB: wheels[wCount-i-1], render: {visible: false}})
-  ]);
-}
 
 // ----- TERRAIN -----
 World.add(engine.world, [
@@ -148,13 +164,11 @@ document.addEventListener('keydown', function (e) {
       Body.applyForce(lowerHull, lowerHull.position, { x: -horVel, y: 0 });
       for (let i = 0; i < 5; i++)
         Body.setAngularVelocity(wheels[i], -angVel)
-      console.log(lowerHull.velocity.x)
   }
   
   if (e.keyCode == KEY_D) {
     Body.applyForce(lowerHull, lowerHull.position, { x: horVel, y: 0 });
     for (let i = 0; i < wheels.length; i++)
       Body.setAngularVelocity(wheels[i], angVel)
-    console.log(lowerHull.velocity.x)
   }
 });
