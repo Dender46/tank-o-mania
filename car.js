@@ -143,7 +143,9 @@ World.add(engine.world, [
 
 // ----- TERRAIN -----
 World.add(engine.world, [
-  Bodies.trapezoid(170, height-170, 240, 80, 0.5, {isStatic: true, label: 'Terrain'}),
+  Bodies.trapezoid(170, height/1.5, 240, 200, 0.3, {isStatic: true, label: 'Terrain'}),
+  Bodies.trapezoid(500, height/1.3, 240, 120, 0.3, {isStatic: true, label: 'Terrain'}),
+  Bodies.trapezoid(500, height/3.2, 120, 50, -0.1, {isStatic: true, label: 'Terrain'}),
 
 ]);
 
