@@ -8,16 +8,18 @@ var Engine = Matter.Engine,
     MouseConstraint = Matter.MouseConstraint,
     Mouse = Matter.Mouse;
 
-var engine = Engine.create();
+var engine = Engine.create({
+  positionIterations: 2,
+  velocityIterations: 2
+});
 var render = Render.create({
 	element: document.body,
 	engine: engine,
   options: {
     width: 1400,
     height: 900,
-	  // width: document.body.clientWidth,
-	  // height: document.body.clientHeight,
-    wireframes: false
+    wireframes: false,
+    showMousePosition: true
   }
 });
 
@@ -37,9 +39,7 @@ var mouse = Mouse.create(render.canvas),
     mouse: mouse,
     constraint: {
       stiffness: 0.1,
-      render: {
-        visible: true
-      }
+      render: { visible: true, type: 'string', lineWidth: 1}
     }
   })
 
