@@ -112,8 +112,7 @@ World.add(engine.world, [
   
   // 4. connect upperHull to lowerHull
   Constraint.create({ bodyA: lowerHull, bodyB: upperHull,
-    render: {strokeStyle: RED, anchors: false, lineWidth: 3},
-    pointA: {x: -40, y: 0}, pointB: {x: -40, y: 0}
+    pointA: {x: -40, y: 0}, pointB: {x: -40, y: 0}, render: {visible: false}
   }),
 
   // 5. connect barrelJoint to upperHull
