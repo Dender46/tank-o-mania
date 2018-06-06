@@ -18,8 +18,8 @@ const RED = '#c02942';
 const wSize = 16;
 const wCount = 5;
 const wSpace = wSize * 2.3;
-const wx = width / 2;
-const wy = height / 2;
+const wx = width / 1.5;
+const wy = height / 1.3;
 const wCenter = Math.floor(wCount / 2);
 
 const wheelOptions = {
@@ -58,30 +58,40 @@ var hullRenderOptions = {
   lineWidth: 6
 }
 
-const lowerHull = Bodies.trapezoid(wx, wy - 30, wSpace * wCount, 20, 0.1, {
-  density: 0.01, chamfer: {radius: 1}, render: hullRenderOptions
+const lowerHull = Bodies.trapezoid(wx, wy - 30, wSpace * wCount, 20, 0.07, {
+  density: 0.01, collisionFilter: {group: group}, chamfer: {radius: 1}, render: hullRenderOptions
 });
 var group = Body.nextGroup(true);
 const upperHull = Bodies.trapezoid(wx, wy - 60, 115, 40, 0.1, {
-  density: 0.000000000001, chamfer: {radius: [1, 10, 10, 1]}, render: hullRenderOptions,
+  density: 0.000001, chamfer: {radius: [1, 10, 10, 1]}, render: hullRenderOptions,
   collisionFilter: {group: group}
 });
 
 // ----- JUMPSENSOR -----
 const jumpSensor = Bodies.rectangle(wx, wy, wCount * wSpace, 70, {
-  isSensor: true,
-  density: 0.000001,
-  label: 'jumpSensor',
+  isSensor: true, density: 0.00000000001, label: 'jumpSensor',
   render: { visible: false }
 });
 
 // ----- BARREL -----
-const barrel = Bodies.rectangle(wx, wy - 100, 12, 120, {
-  density: 0.000000000001, collisionFilter: {group: group}, render: hullRenderOptions
+const barrelJoint = Bodies.rectangle(wx, wy - 70, 10, 40, {
+  density: 0.0000000001, collisionFilter: {group: group}, render: {visible: false},
+});
+const barrel = Bodies.rectangle(wx, wy - 110, 10, 120, {
+  density: 0.0000000000001, collisionFilter: {group: group}, render: hullRenderOptions,
+});
+const projArea = Bodies.trapezoid(wx, wy - 170, 15, 20, -0.1, {
+  density: 0.000000000000000001, collisionFilter: {group: group}, render: hullRenderOptions
 })
 
 World.add(engine.world, [
-  jumpSensor, barrel, lowerHull, upperHull,
+  jumpSensor,
+  lowerHull, 
+
+  barrel,
+  projArea,
+  upperHull,
+  barrelJoint,
 
   // 1. connect lowerHull to wheels
   Constraint.create({ bodyA: wheels[0], bodyB: lowerHull, render: {visible: false} }),
@@ -93,28 +103,42 @@ World.add(engine.world, [
   // 3. connect jumpSensor to lowerHull
   Constraint.create({ bodyA: lowerHull, bodyB: jumpSensor,
     length: 0.001, render: {visible: false},
-    pointA: {x: -90, y: 0},
-    pointB: {x: -90, y: -20}
+    pointA: {x: -90, y: 0}, pointB: {x: -90, y: -20}
   }),
   Constraint.create({ bodyA: lowerHull, bodyB: jumpSensor,
     length: 0.001, render: {visible: false},
-    pointA: {x: 90, y: 0},
-    pointB: {x: 90, y: -20}
+    pointA: {x: 90, y: 0}, pointB: {x: 90, y: -20}
   }),
   
   // 4. connect upperHull to lowerHull
   Constraint.create({ bodyA: lowerHull, bodyB: upperHull,
     render: {strokeStyle: RED, anchors: false, lineWidth: 3},
-    pointA: {x: -40, y: 0},
-    pointB: {x: -40, y: 0},
+    pointA: {x: -40, y: 0}, pointB: {x: -40, y: 0}
   }),
 
-  // 5. connect barrel to upperHull
-  Constraint.create({ bodyA: barrel, bodyB: upperHull,
+  // 5. connect barrelJoint to upperHull
+  Constraint.create({ bodyA: upperHull, bodyB: barrelJoint,
     render: {strokeStyle: '#181818', lineWidth: 5},
-    pointA: {x: 0, y: 50},
-    pointB: {x: 0, y: 10},
-  })
+    pointA: {x: 0, y: -10},
+  }),
+
+  // 6. connect barrel to barrelJoint
+  Constraint.create({ bodyA: barrel, bodyB: barrelJoint,
+    length: 0.001, render: {visible: false},
+    pointA: {x: 0, y: 55}, pointB: {x: 0, y: 15}
+  }),
+  Constraint.create({ bodyA: barrel, bodyB: barrelJoint,
+    length: 0.001, render: {visible: false},
+    pointA: {x: 0, y: 25}, pointB: {x: 0, y: -15}
+  }),
+
+  // 7. connect shooting area to barrel
+  Constraint.create({ bodyA: projArea, bodyB: barrel,
+    render: {visible: false}, pointA: {x: 7, y: 5}, pointB: {x: 7, y: -55}
+  }),
+  Constraint.create({ bodyA: projArea, bodyB: barrel,
+    render: {visible: false}, pointA: {x: -7, y: 5}, pointB: {x: -7, y: -55}
+  }),
 ]);
 
 
@@ -133,7 +157,6 @@ Events.on(engine, 'collisionStart', event => {
     if (pairs[i].bodyA == jumpSensor && pairs[i].bodyB.label == 'Terrain' ||
       pairs[i].bodyB == jumpSensor && pairs[i].bodyA.label == 'Terrain') {
       allowJump = true;
-      console.log()
     }
   }
 });
@@ -150,6 +173,15 @@ Events.on(engine, 'collisionEnd', event => {
     }
   }
 });
+
+// ----- ROTATING BARRELL -----
+var pos = barrelJoint.position;
+Events.on(engine, 'beforeUpdate', function() {
+  let mPos = mouse.position;
+  let hullPos = lowerHull.position;
+  angle = Math.atan2(mPos.y - pos.y, mPos.x - pos.x) + 1.57;
+    Body.setAngle(barrelJoint, angle);
+})
 
 var angVel = 0.1;
 var horVel = 0.22;
