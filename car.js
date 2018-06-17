@@ -70,24 +70,24 @@ const upperHull = Bodies.trapezoid(wx, wy - 60, 115, 40, 0.1, {
 // ----- JUMPSENSOR -----
 const jumpSensor = Bodies.rectangle(wx, wy, wCount * wSpace, 70, {
   isSensor: true, density: 0.00000000001, label: 'jumpSensor',
-  render: { visible: false }
+  render: {visible: false}
 });
 
 // ----- BARREL -----
 const barrelJoint = Bodies.rectangle(wx, wy - 70, 10, 40, {
-  density: 0.0000000001, collisionFilter: {group: group}, render: {visible: false},
+  density: 0.0000000001, collisionFilter: {group: group}, render: {visible: false}
 });
 const barrel = Bodies.rectangle(wx, wy - 110, 10, 120, {
-  density: 0.0000000000001, collisionFilter: {group: group}, render: hullRenderOptions,
+  density: 0.0000000000001, isSensor: true, render: hullRenderOptions
 });
 const projArea = Bodies.trapezoid(wx, wy - 170, 15, 20, -0.1, {
-  density: 0.000000000000000001, collisionFilter: {group: group}, render: hullRenderOptions
+  density: 0.000000000000000001, isSensor: true, render: hullRenderOptions
 })
 
 World.add(engine.world, [
   jumpSensor,
   lowerHull, 
-
+  
   barrel,
   projArea,
   upperHull,
@@ -102,41 +102,39 @@ World.add(engine.world, [
 
   // 3. connect jumpSensor to lowerHull
   Constraint.create({ bodyA: lowerHull, bodyB: jumpSensor,
-    length: 0.001, render: {visible: false},
-    pointA: {x: -90, y: 0}, pointB: {x: -90, y: -20}
+    pointA: {x: -90, y: 10}, pointB: {x: -90, y: -20}, render: {visible: false}
   }),
   Constraint.create({ bodyA: lowerHull, bodyB: jumpSensor,
-    length: 0.001, render: {visible: false},
-    pointA: {x: 90, y: 0}, pointB: {x: 90, y: -20}
+    pointA: {x: 90, y: 10}, pointB: {x: 90, y: -20}, render: {visible: false}
   }),
   
   // 4. connect upperHull to lowerHull
   Constraint.create({ bodyA: lowerHull, bodyB: upperHull,
     pointA: {x: -40, y: 0}, pointB: {x: -40, y: 0}, render: {visible: false}
   }),
+  Constraint.create({ bodyA: lowerHull, bodyB: upperHull,
+    pointA: {x: 40, y: 0}, pointB: {x: -40, y: 0}, render: {visible: false}
+  }),
 
   // 5. connect barrelJoint to upperHull
   Constraint.create({ bodyA: upperHull, bodyB: barrelJoint,
-    render: {strokeStyle: '#181818', lineWidth: 5},
-    pointA: {x: 0, y: -10},
+    render: {strokeStyle: '#181818', lineWidth: 5}, pointA: {x: 0, y: -10}
   }),
 
   // 6. connect barrel to barrelJoint
   Constraint.create({ bodyA: barrel, bodyB: barrelJoint,
-    length: 0.001, render: {visible: false},
-    pointA: {x: 0, y: 55}, pointB: {x: 0, y: 15}
+    pointA: {x: 0, y: 55}, pointB: {x: 0, y: 15}, render: {visible: false}
   }),
   Constraint.create({ bodyA: barrel, bodyB: barrelJoint,
-    length: 0.001, render: {visible: false},
-    pointA: {x: 0, y: 25}, pointB: {x: 0, y: -15}
+    pointA: {x: 0, y: 25}, pointB: {x: 0, y: -15}, render: {visible: false}
   }),
 
   // 7. connect shooting area to barrel
   Constraint.create({ bodyA: projArea, bodyB: barrel,
-    render: {visible: false}, pointA: {x: 7, y: 5}, pointB: {x: 7, y: -55}
+    pointA: {x: 7, y: 5}, pointB: {x: 7, y: -55}, render: {visible: false}
   }),
   Constraint.create({ bodyA: projArea, bodyB: barrel,
-    render: {visible: false}, pointA: {x: -7, y: 5}, pointB: {x: -7, y: -55}
+    pointA: {x: -7, y: 5}, pointB: {x: -7, y: -55}, render: {visible: false}
   }),
 ]);
 
@@ -181,17 +179,44 @@ Events.on(engine, 'beforeUpdate', function() {
   let mPos = mouse.position;
   let hullPos = lowerHull.position;
   angle = Math.atan2(mPos.y - pos.y, mPos.x - pos.x) + 1.57;
-    Body.setAngle(barrelJoint, angle);
+  Body.setAngle(barrelJoint, angle);
 })
+
+// ----- PROJECTILES -----
+function createProjectile(x, y) {
+  let proj = Bodies.rectangle(x, y, 18, 18, {
+    render: {fillStyle: '#ffb83d', opacity: 0.8}
+  });
+  World.add(engine.world, [proj]);
+
+  let mPos = mouse.position;
+  angle = Math.atan2(mPos.y - pos.y, mPos.x - pos.x);
+  Body.setAngle(proj, angle);
+  Body.applyForce(proj, proj.position, {x: Math.cos(angle) / 40, y: Math.sin(angle) / 40})
+}
+
+var limitShooting = 5;
+
+Events.on(engine, 'beforeUpdate', function() {
+  if (mouse.button == 0) {
+    if (Math.floor(engine.timing.timestamp % 500 / 100) == 0 && limitShooting > 5) {
+      createProjectile(projArea.position.x, projArea.position.y)
+      limitShooting = 0;
+    }
+    limitShooting++;
+  }
+}, false);
+
+
 
 var angVel = 0.1;
 var horVel = 0.22;
-var verVel = 0.4;
+var verVel = 0.5;
 var horVelMax = 4;
 
 document.addEventListener('keydown', function (e) {
   if (allowJump && e.keyCode == KEY_SPACE)
-    Body.applyForce(lowerHull, lowerHull.position, { x: 0, y: (-verVel * wCount) });
+    Body.applyForce(lowerHull, lowerHull.position, {x: 0, y: (-verVel * wCount)});
 
   if (e.keyCode == KEY_A) {
       Body.applyForce(lowerHull, lowerHull.position, { x: -horVel, y: 0 });
