@@ -17,11 +17,12 @@ var render = Render.create({
 	element: document.body,
 	engine: engine,
   options: {
-    width: 1400,
-    height: 900,
+    // width: 1900,
+    // height: 800,
+    width: document.body.clientWidth,
+	  height: document.body.clientHeight,
     wireframes: false,
-    showMousePosition: true,
-    showDebug: true
+    showMousePosition: true
   }
 });
 
