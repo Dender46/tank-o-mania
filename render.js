@@ -35,9 +35,17 @@ const floor = Bodies.rectangle(width/2, height/1.2, width, 50, {
   label: 'Terrain'
 });
 
+// Drag and drop
+const mouse = Mouse.create(render.canvas),
+mouseConstraint = MouseConstraint.create(engine, {
+  mouse: mouse,
+})
+
 World.add(engine.world, [
   floor
 ]);
+
+render.mouse = mouse;
 
 Engine.run(engine);
 Render.run(render);
