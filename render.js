@@ -22,7 +22,6 @@ var render = Render.create({
     width: document.body.clientWidth,
 	  height: document.body.clientHeight,
     wireframes: false,
-    showMousePosition: true
   }
 });
 
